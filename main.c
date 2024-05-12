@@ -26,7 +26,6 @@ uint8_t tx_pool[100];
 
 volatile bool seen_can_message = false;
 
-
 int main(void)
 {
     // Initialize the device
@@ -78,13 +77,8 @@ int main(void)
         seen_can_message = false;
         last_message_millis = millis();
     }
-    if (seen_can_command) {
-        seen_can_command = false;
-        last_command_millis = millis();
-    }
-
-    if (millis() - last_message_millis > MAX_BUS_DEAD_TIME_ms &&
-        (SAFE_STATE_ENABLED || requested_actuator_state == SAFE_STATE)) {
+  
+    if (millis() - last_message_millis > MAX_BUS_DEAD_TIME_ms) {
         // Only reset if safe state is enabled (aka this isn't injector valve)
         // OR this is injector valve and the currently requested state is the safe
         // state (closed)
@@ -113,7 +107,7 @@ int main(void)
             
             // Create a CAN message for each thermocouple reading
             can_msg_t temp_msg;
-            build_temp_data_msg();
+            build_temp_data_msg(timestamp, i, temp_data, &temp_msg);
 
             // Send the CAN message
             txb_enqueue(&temp_msg);
@@ -175,7 +169,9 @@ static void can_msg_handler(const can_msg_t *msg) {
                 RESET();
             }
             break;
-        // all the other ones - do nothing
+        
+            
+        
         default:
            break;
     }

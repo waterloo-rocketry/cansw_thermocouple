@@ -10,12 +10,12 @@
 #include "canlib/util/timing_util.h"
 
 #include "mcc_generated_files/device_config.h"
-#include "mcc_generated_files/mcc.h"
 #include "mcc_generated_files/pin_manager.h"
 
 
-#include "device_config.h"
 #include "error_checks.h"
+#include "thermocouple.h"
+#include "spi.h"
 
 
 static void can_msg_handler(const can_msg_t *msg);
@@ -28,8 +28,7 @@ volatile bool seen_can_message = false;
 
 int main(void)
 {
-    // Initialize the device
-    SYSTEM_Initialize();
+    PIN_MANAGER_Initialize();
     
     oscillator_init(); // init the external oscillator
     timer0_init(); // init our millis() function
@@ -41,12 +40,12 @@ int main(void)
     
     // Set up CAN TX
     TRISC0 = 0;
-    RC0PPS = 0x33; // make C0 transmit CAN TX (page 267)
+    RC0PPS = 0x33; // (page 268)
 
     // Set up CAN RX
     TRISC1 = 1;
     ANSELC1 = 0;
-    CANRXPPS = 0x11; // make CAN read from C1 (page 264-265)
+    CANRXPPS = 0x11; // (page 265)
     
     // set up CAN module
     can_timing_t can_setup;
@@ -56,7 +55,7 @@ int main(void)
     // set up CAN tx buffer
     txb_init(tx_pool, sizeof(tx_pool), can_send, can_send_rdy);
 
-    spi_init();
+    spi1_init();
     init_tc();
     
     // loop timer
@@ -107,6 +106,7 @@ int main(void)
             
             // Create a CAN message for each thermocouple reading
             can_msg_t temp_msg;
+            // will need to also send board num
             build_temp_data_msg(timestamp, i, temp_data, &temp_msg);
 
             // Send the CAN message

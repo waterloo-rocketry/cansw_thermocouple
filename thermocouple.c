@@ -3,8 +3,6 @@
 #define LEN_TC 4
 
 
-
-/*actually redundant (ioexp initializes these already, but uh paranoia i guess)*/
 void init_tc(void)
 {
     // Setting CS pins as output
@@ -44,7 +42,6 @@ void get_tc(uint16_t *data_out, uint8_t tc_num)
     spi1_exchange_buffer(data, LEN_TC);
 
     // Convert 16 bit MSB readings to 16 bits
-    // Ignore everything else
     *data_out = (((uint16_t)data[0] << 8) | data[1]) >> 2; 
     
     // Set CS pin high to stop data transmission

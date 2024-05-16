@@ -1,4 +1,4 @@
-build/default/production/canlib/tests/mcp2515_picdev.X/mcc_generated_files\mcc.p1: \
+build/default/production/canlib/tests/mcp2515_picdev.X/mcc_generated_files\mcc.i: \
   canlib/tests/mcp2515_picdev.X/mcc_generated_files/mcc.c \
   canlib/tests/mcp2515_picdev.X/mcc_generated_files/mcc.h \
   canlib/tests/mcp2515_picdev.X/mcc_generated_files/device_config.h \

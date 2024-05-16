@@ -57,6 +57,17 @@ void oscillator_init(void){
     
 }
 
+void LED_init(){
+    
+    TRISB3 = 0;
+    TRISB4 = 0;
+    TRISB5 = 0;
+    
+    LATB3 = 1;
+    LATB4 = 1;
+    LATB5 = 1;
+}
+
 // Configuration bits: selected in the GUI
 
 // CONFIG1L

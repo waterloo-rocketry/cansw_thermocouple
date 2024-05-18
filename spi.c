@@ -1,10 +1,11 @@
 #include "spi.h"
 #include <xc.h>
 #include <stdbool.h>
+# include <stdint.h>
 
 void spi1_init(void)
 {
-    
+        
     SPI1CON0bits.MST = 1; // set mode to master
     SPI1CON0bits.BMODE = 1; // sets bit mode to constant width
     SPI1CON0bits.LSBF = 0; // Data is exchanged MSb first
@@ -24,6 +25,7 @@ void spi1_init(void)
     //BAUD 0; 
     SPI1BAUD = 0x00;
     TRISCbits.TRISC3 = 0;
+    TRISCbits.TRISC4 = 1;
     
     SPI1CON0bits.EN = 1; // enable spi
 
@@ -31,7 +33,7 @@ void spi1_init(void)
 
 
 /**/
-static uint8_t spi1_exchange(uint8_t data)
+uint8_t spi1_exchange(uint8_t data)
 {
     INTCON0bits.GIE = 0;
     SPI1TXB = data; 

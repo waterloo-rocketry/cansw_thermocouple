@@ -2,7 +2,6 @@
 
 #define LEN_TC 4
 
-
 void init_tc(void)
 {
     // Setting CS pins as output

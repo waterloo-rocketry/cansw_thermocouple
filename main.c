@@ -1,4 +1,6 @@
 #include <xc.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #include "canlib/canlib.h"
 #include "canlib/can.h"
@@ -13,9 +15,9 @@
 #include "mcc_generated_files/pin_manager.h"
 
 
-#include "error_checks.h"
 #include "thermocouple.h"
 #include "spi.h"
+#include "board.h"
 
 
 static void can_msg_handler(const can_msg_t *msg);
@@ -61,7 +63,6 @@ int main(void)
     // loop timer
     uint32_t last_millis = millis();
     uint32_t last_message_millis = millis();
-    uint32_t last_command_millis = millis();
 
     bool heartbeat = false;
 
@@ -69,7 +70,7 @@ int main(void)
     CLRWDT(); // Feed the watchdog, which is set for 256ms
 
     if (OSCCON2 != 0x70) { // If the fail-safe clock monitor has triggered
-        OSCILLATOR_Initialize();
+        oscillator_init();
     }
 
     if (seen_can_message) {
@@ -78,41 +79,29 @@ int main(void)
     }
   
     if (millis() - last_message_millis > MAX_BUS_DEAD_TIME_ms) {
-        // Only reset if safe state is enabled (aka this isn't injector valve)
-        // OR this is injector valve and the currently requested state is the safe
-        // state (closed)
-
         // We've got too long without seeing a valid CAN message (including one of ours)
         RESET();
     }
 
     if (millis() - last_millis > MAX_LOOP_TIME_DIFF_ms) {
-
-        // Check for general board status
-        bool status_ok = true;
-        status_ok &= check_battery_voltage_error();
-        status_ok &= check_bus_current_error();
-        status_ok &= check_actuator_pin_error(requested_actuator_state);
-
-        // If there was an issue, a message would already have been sent out
-        if (status_ok) {
-            send_status_ok();
-        }
-
         // Read data from thermocouples and send over CAN bus
         for (uint8_t i = 0; i < 4; i++) {
+            // Get temperature data for thermocouple i
             uint16_t temp_data = 0;
             get_tc(&temp_data, i);
-            
-            // Create a CAN message for each thermocouple reading
+
+            // Create a CAN message for the temperature data
             can_msg_t temp_msg;
-            // will need to also send board num
+
+            // Get the current timestamp
+            uint32_t timestamp = millis();
+
+            // Build the CAN message with the timestamp and temperature data
             build_temp_data_msg(timestamp, i, temp_data, &temp_msg);
 
             // Send the CAN message
             txb_enqueue(&temp_msg);
         }
-
 
         // Update our loop counter
         last_millis = millis();
@@ -152,15 +141,15 @@ static void can_msg_handler(const can_msg_t *msg) {
             break;
 
         case MSG_LEDS_ON:
-            LED_ON_G();
-            LED_ON_B();
-            LED_ON_W();
+            RED_LED_ON()();
+            ORANGE_LED_ON();
+            YELLOW_LED_ON();
             break;
 
         case MSG_LEDS_OFF:
-            LED_OFF_G();
-            LED_OFF_B();
-            LED_OFF_W();
+            RED_LED_OFF()();
+            ORANGE_LED_OFF();
+            YELLOW_LED_OFF();
             break;
 
         case MSG_RESET_CMD:
@@ -170,13 +159,12 @@ static void can_msg_handler(const can_msg_t *msg) {
             }
             break;
         
-            
-        
         default:
            break;
     }
 }
 
+// DO WE NEED? Not monitoring for bus voltage or current.
 // Send a CAN message with nominal status
 static void send_status_ok(void) {
     can_msg_t board_stat_msg;

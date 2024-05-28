@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=cansw_thermocouple.X
+PROJECTNAME=cansw_thermocouple
 
 # Active Configuration
 DEFAULTCONF=default

@@ -6,7 +6,7 @@ void LED_init() {
     TRISB4 = 0;
     TRISB5 = 0;
     // returns if pin is on or off
-    LATB3 = 1;
+    LATB3 =1;
     LATB4 = 1;
     LATB5 = 1;
 }

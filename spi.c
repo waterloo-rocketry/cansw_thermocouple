@@ -26,14 +26,13 @@ void spi1_init(void) {
     SPI1CON0bits.EN = 1; // enable SPI
 }
 
-/**/
 uint8_t spi1_exchange(uint8_t data) {
     INTCON0bits.GIE = 0;
     SPI1CON2bits.TXR = 0;
     SPI1CON2bits.RXR = 1;
     SPI1TCNT = 1;
     SPI1TXB = data; /*if we're sending data, send it. if we're recieving, this is 0 (unless you
-   // initialized bad), but makes sure we output a clock*/
+                       initialized bad), but makes sure we output a clock*/
     while (!PIR2bits.SPI1RXIF) {
     } // wait until receive buffer is not empty?? (basically until theres a clock)
     data = SPI1RXB;
@@ -45,7 +44,7 @@ void spi1_exchange_buffer(uint8_t *data, uint8_t data_len) {
     // set data length
     SPI1TCNTL = data_len;
     SPI1TCNTH = 0;
-    // uint8_t *block = data;
+
     while (data_len) {
         *data = spi1_exchange(*data); // sends pointer, so data gets shoved into array
         data++; // increment array

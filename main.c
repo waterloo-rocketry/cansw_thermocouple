@@ -10,6 +10,10 @@
 #include "spi.h"
 #include "thermocouple.h"
 
+#define MAX_TC_TIME_DIFF_ms 200 // 5 Hz
+#define MAX_HEARTBEAT_TIME_DIFF_ms 500 // 2 Hz
+#define MAX_BUS_DEAD_TIME_ms 5000 // 5 s
+
 #if (BOARD_UNIQUE_ID == BOARD_ID_THERMOCOUPLE_1)
 #define build_tc_temp_data_msg(timestamp, id, temp, msg)                                           \
     build_temp_data_msg(timestamp, id, temp, msg);
